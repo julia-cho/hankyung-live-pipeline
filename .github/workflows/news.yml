@@ -26,8 +26,4 @@ jobs:
           true
 
       - name: Run pipeline script
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          NOTION_TOKEN:   ${{ secrets.NOTION_TOKEN }}
-          NOTION_DB_ID:   ${{ secrets.NOTION_DB_ID }}
         run: python scripts/run_pipeline.py
