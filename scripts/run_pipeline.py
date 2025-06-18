@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()                           # .env 값 로드
 
-YT_URL = "https://www.youtube.com/channel/UCAVdqlngIAxHtwlCA2hjv3A/live"
+CHANNEL_ID = "UCAVdqlngIAxHtwlCA2hjv3A"          # ← 한경 채널 ID
+YT_URL     = f"https://www.youtube.com/channel/{CHANNEL_ID}"
 DATE   = datetime.datetime.now().strftime("%Y%m%d")
 
 WORKDIR = pathlib.Path("work")
