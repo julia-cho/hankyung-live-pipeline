@@ -15,19 +15,38 @@ txt   = WORKDIR / f"{DATE}.txt"
 
 def cmd(*args): subprocess.check_call(list(args))
 
-def download():
+def download() -> bool:
+    """
+    플레이리스트에서
+      · 길이 5분↑
+      · 전체 공개
+    조건을 만족하는 **가장 최근 VOD 1편**만 mp3로 내려받는다.
+    조건에 맞는 영상이 없으면 False 반환.
+    """
     if mp3.exists():
         return True
 
-    cmd(
-        "yt-dlp",
-        "--playlist-end", "1",            # 맨 위 1개 항목만
-        "--match-filter", "duration > 300",  # 5분↑ (숏츠 대비)
-        "--extract-audio", "--audio-format", "mp3",
-        "-o", str(mp3),
-        YT_URL
-    )
-    return True
+    try:
+        cmd(
+            "yt-dlp",
+            "-i",                               # ❶ 에러(멤버십·비공개) 무시하고 다음으로
+            "--playlist-end", "10",             #   최근 10편까지만 검사
+            "--max-downloads", "1",             # ❷ 첫 성공 1편 받으면 즉시 종료
+            "--match-filter",
+            (
+              "duration > 300 "
+              " & availability = 'public'"
+            ),
+            "--extract-audio", "--audio-format", "mp3",
+            "-o", str(mp3),
+            YT_URL,
+        )
+    except subprocess.CalledProcessError as e:
+        print("⚠️ yt-dlp 실패:", e)
+        return False
+
+    # 성공했는데 mp3가 없으면(= 조건 만족하는 영상 없음) False
+    return mp3.exists()
 
 def stt():
     if txt.exists(): return
