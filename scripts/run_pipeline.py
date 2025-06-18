@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()                           # .env 값 로드
 
-CHANNEL_ID = "UCAVdqlngIAxHtwlCA2hjv3A"          # ← 한경 채널 ID
-YT_URL     = f"https://www.youtube.com/channel/{CHANNEL_ID}"
+CHANNEL_ID = "UCAVdqlngIAxHtwlCA2hjv3A"
+YT_URL     = f"https://www.youtube.com/channel/{CHANNEL_ID}/streams"
 DATE   = datetime.datetime.now().strftime("%Y%m%d")
 
 WORKDIR = pathlib.Path("work")
@@ -17,16 +17,16 @@ def cmd(*args): subprocess.check_call(list(args))
 
 def download():
     if mp3.exists():
-        return True   # 이미 받았으면 건너뜀
+        return True
 
     cmd(
         "yt-dlp",
-        "--dateafter", "now-1day",          # 지난 24 시간 이내 업로드
-        "--match-filter", "duration > 600", # 600초(10분) 이상만
-        "--playlist-end", "1",              # 조건 맞는 최신 1편만
+        "--dateafter", "now-2day",        # 이틀 이내 (VOD 업로드 지연 여유)
+        "--playlist-end", "1",            # 최신 1편만
+        "--match-filter", "duration > 600",
         "--extract-audio", "--audio-format", "mp3",
         "-o", str(mp3),
-        f"https://www.youtube.com/channel/{CHANNEL_ID}/videos"
+        YT_URL
     )
     return True
 
