@@ -30,5 +30,4 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           NOTION_TOKEN:   ${{ secrets.NOTION_TOKEN }}
           NOTION_DB_ID:   ${{ secrets.NOTION_DB_ID }}
-        run: |
-          python scripts/run_pipeline.py || echo "파이프라인 스크립트 아직 없음"
+        run: python scripts/run_pipeline.py
