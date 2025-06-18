@@ -17,15 +17,16 @@ def cmd(*args): subprocess.check_call(list(args))
 
 def download():
     if mp3.exists():
-        return True
+        return True   # 이미 받았으면 건너뜀
 
     cmd(
         "yt-dlp",
-        "--dateafter", "now-1day",      # 24시간 이내 업로드만
-        "--playlist-end", "1",          # 최신 영상 1개만
+        "--dateafter", "now-1day",          # 지난 24 시간 이내 업로드
+        "--match-filter", "duration > 600", # 600초(10분) 이상만
+        "--playlist-end", "1",              # 조건 맞는 최신 1편만
         "--extract-audio", "--audio-format", "mp3",
         "-o", str(mp3),
-        f"https://www.youtube.com/channel/{CHANNEL_ID}"
+        f"https://www.youtube.com/channel/{CHANNEL_ID}/videos"
     )
     return True
 
