@@ -21,9 +21,16 @@ def download():
 
     cmd(
         "yt-dlp",
-        "--dateafter", "now-2day",        # 이틀 이내 (VOD 업로드 지연 여유)
-        "--playlist-end", "1",            # 최신 1편만
-        "--match-filter", "duration > 600",
+        "--dateafter", "now-2day",
+        "--playlist-end", "5",
+        "--match-filter",
+        (
+          "duration > 600 "
+          " & availability != 'members_only' "
+          " & availability != 'requires_payment' "
+          " & availability != 'private' "
+          " & !is_live"
+        ),
         "--extract-audio", "--audio-format", "mp3",
         "-o", str(mp3),
         YT_URL
