@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()                           # .env 값 로드
 
-CHANNEL_ID = "UCAVdqlngIAxHtwlCA2hjv3A"
-YT_URL     = f"https://www.youtube.com/channel/{CHANNEL_ID}/streams"
+PLAYLIST_ID = "PLVups02-DZEWWyOMyk4jjGaWJ_0o1N1iO"     # ← 방금 복사한 ID
+YT_URL      = f"https://www.youtube.com/playlist?list={PLAYLIST_ID}"
 DATE   = datetime.datetime.now().strftime("%Y%m%d")
 
 WORKDIR = pathlib.Path("work")
@@ -21,16 +21,8 @@ def download():
 
     cmd(
         "yt-dlp",
-        "--dateafter", "now-2day",
-        "--playlist-end", "5",
-        "--match-filter",
-        (
-          "duration > 600 "
-          " & availability != 'members_only' "
-          " & availability != 'requires_payment' "
-          " & availability != 'private' "
-          " & !is_live"
-        ),
+        "--playlist-end", "1",            # 맨 위 1개 항목만
+        "--match-filter", "duration > 300",  # 5분↑ (숏츠 대비)
         "--extract-audio", "--audio-format", "mp3",
         "-o", str(mp3),
         YT_URL
