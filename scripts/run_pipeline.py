@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()                           # .env 값 로드
 
-YT_URL = "https://www.youtube.com/@hankyungeconomicnews/live"
+YT_URL = "https://www.youtube.com/channel/UCAVdqlngIAxHtwlCA2hjv3A/live"
 DATE   = datetime.datetime.now().strftime("%Y%m%d")
 
 WORKDIR = pathlib.Path("work")
