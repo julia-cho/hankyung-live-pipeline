@@ -15,10 +15,18 @@ txt   = WORKDIR / f"{DATE}.txt"
 def cmd(*args): subprocess.check_call(list(args))
 
 def download():
-    if mp3.exists(): return
-    cmd("yt-dlp", "--live-from-start", "--wait-for-video", "600",
+    if mp3.exists():
+        return True
+
+    cmd(
+        "yt-dlp",
+        "--dateafter", "now-1day",      # 24시간 이내 업로드만
+        "--playlist-end", "1",          # 최신 영상 1개만
         "--extract-audio", "--audio-format", "mp3",
-        "-o", str(mp3), YT_URL)
+        "-o", str(mp3),
+        f"https://www.youtube.com/channel/{CHANNEL_ID}"
+    )
+    return True
 
 def stt():
     if txt.exists(): return
