@@ -1,0 +1,6 @@
+yt-dlp
+whispercpp
+torch
+transformers
+notion-client
+python-dotenv
