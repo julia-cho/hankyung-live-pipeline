@@ -1,3 +1,2 @@
-#!/usr/bin/env python
-# TODO: 라이브 다운로드 → STT → 요약 → 노션 업로드 스크립트
-print("Hello, 세젤예 민주님! 파이프라인 준비 중 ✨")
+#!/usr/bin/env python3
+print("🎉 파이프라인 템플릿이 잘 실행됐어요!")
