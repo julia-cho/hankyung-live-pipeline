@@ -1,0 +1,34 @@
+name: news pipeline
+
+on:
+  schedule:                # 평일 08:00 KST = 23:00 UTC
+    - cron: '0 23 * * 0-4'
+  workflow_dispatch: {}    # 수동 버튼으로도 실행 가능
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install system deps
+        run: sudo apt update && sudo apt install -y ffmpeg
+
+      - name: Install Python deps
+        run: |
+          pip install -r requirements.txt
+          # 초기에 requirements.txt가 없어도 에러 안 나게 대비
+          true
+
+      - name: Run pipeline script
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          NOTION_TOKEN:   ${{ secrets.NOTION_TOKEN }}
+          NOTION_DB_ID:   ${{ secrets.NOTION_DB_ID }}
+        run: |
+          python scripts/run_pipeline.py || echo "파이프라인 스크립트 아직 없음"
