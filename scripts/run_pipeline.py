@@ -1,89 +1,52 @@
-import os, subprocess, datetime, pathlib, textwrap
-from notion_client import Client
-from dotenv import load_dotenv
+from pathlib import Path
+import subprocess
+import whisper
+import datetime
 
-load_dotenv()                           # .env 값 로드
+# 오늘 날짜 mp3 경로 지정
+today = datetime.datetime.now().strftime('%Y%m%d')
+mp3 = Path(f"work/{today}.mp3")
+text = Path(f"work/{today}.txt")
 
-PLAYLIST_ID = "PLVups02-DZEWWyOMyk4jjGaWJ_0o1N1iO"     # ← 방금 복사한 ID
-YT_URL      = f"https://www.youtube.com/playlist?list={PLAYLIST_ID}"
-DATE   = datetime.datetime.now().strftime("%Y%m%d")
-
-WORKDIR = pathlib.Path("work")
-WORKDIR.mkdir(exist_ok=True)
-mp3   = WORKDIR / f"{DATE}.mp3"
-txt   = WORKDIR / f"{DATE}.txt"
-
-def cmd(*args): subprocess.check_call(list(args))
-
-def download() -> bool:
-    """
-    플레이리스트에서
-      · 길이 5분↑
-      · 전체 공개
-    조건을 만족하는 **가장 최근 VOD 1편**만 mp3로 내려받는다.
-    조건에 맞는 영상이 없으면 False 반환.
-    """
-    if mp3.exists():
-        return True
-
+def download():
     try:
-        cmd(
+        url = "https://www.youtube.com/playlist?list=PLVups02-DZEWwYOMyK4jjGaWJ_0o1N1i0"
+        command = [
             "yt-dlp",
-            "-i",                               # ❶ 에러(멤버십·비공개) 무시하고 다음으로
-            "--playlist-end", "10",             #   최근 10편까지만 검사
-            "--max-downloads", "1",             # ❷ 첫 성공 1편 받으면 즉시 종료
-            "--match-filter",
-            (
-              "duration > 300 "
-              " & availability = 'public'"
-            ),
-            "--extract-audio", "--audio-format", "mp3",
+            "-i",  # 오류 무시하고 진행
+            "--playlist-end", "10",  # 최신 10개만 검사
+            "--max-downloads", "1",  # 1개만 받음
+            "--match-filter", "duration > 300 & availability = 'public'",  # 5분 넘는 공개 영상만
+            "--extract-audio",
+            "--audio-format", "mp3",
             "-o", str(mp3),
-            YT_URL,
-        )
-    except subprocess.CalledProcessError as e:
-        print("⚠️ yt-dlp 실패:", e)
+            url
+        ]
+        subprocess.check_call(command)
+        return mp3.exists()
+    except subprocess.CalledProcessError:
         return False
 
-    # 성공했는데 mp3가 없으면(= 조건 만족하는 영상 없음) False
-    return mp3.exists()
-
 def stt():
-    if txt.exists(): return
-    cmd("whispercpp", str(mp3), "--model", "small-int8",
-        "--language", "ko", "--output-txt")
-    mp3.with_suffix(".txt").rename(txt)
+    print("🎙 Whisper로 STT 시작")
+    model = whisper.load_model("small")  # small-fast 추천
+    result = model.transcribe(str(mp3))
+    text.write_text(result["text"])
+    print("📝 텍스트 추출 완료")
 
-def summarize() -> str:
-    import re, itertools, collections
-    content = txt.read_text(encoding="utf-8")
-    # 1) 문장 단위 자르기
-    import pysbd; seg=pysbd.Segmenter(lang="ko",clean=False)
-    sents = seg.segment(content)[:12]          # 처음 12문장만
-    # 2) 숫자 포함 문장 우선 추출
-    nums  = [s for s in sents if re.search(r"\d", s)]
-    top   = nums[:5] if nums else sents[:5]
-    return " ".join(top)
+def summarize():
+    print("📄 요약하는 기능은 여기에 작성!")
+    return text.read_text()[:300] + "..."  # 예시 요약
 
 def push_notion(summary):
-    client = Client(auth=os.getenv("NOTION_TOKEN"))
-    db_id  = os.getenv("NOTION_DB_ID")
-    client.pages.create(
-        parent={"database_id": db_id},
-        properties={
-            "Name": {"title":[{"text":{"content":f"{DATE} 한경 LIVE"}}]},
-            "Date": {"date":{"start":DATE}}
-        },
-        children=[{
-            "object":"block","type":"paragraph",
-            "paragraph":{"rich_text":[{"type":"text",
-            "text":{"content":summary}}]}
-        }]
-    )
+    print("🔗 노션에 업로드하는 코드가 여기에 들어감")
+    print(summary)
 
 if __name__ == "__main__":
-    download()
-    stt()
-    summary = summarize()
-    push_notion(summary)
-    print("✅ ALL DONE")
+    if download():
+        stt()
+        summary = summarize()
+        push_notion(summary)
+        print("✅ 파이프라인 완료")
+    else:
+        print("📭 오늘은 전체공개 5분 이상 VOD가 없어 건너뜁니다!")
