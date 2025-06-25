@@ -2,28 +2,40 @@ name: news pipeline
 
 on:
   schedule:
-    - cron: '0 4 * * 1-5'     # ★ UTC 04:00 = 한국 13:00 평일
-  workflow_dispatch: {}    # 수동 버튼으로도 실행 가능
+    - cron: '0 4 * * 1-5'     # UTC 04:00 = 한국 13:00 평일
+  workflow_dispatch: {}       # 수동 실행 가능
 
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Install system deps
-        run: sudo apt update && sudo apt install -y ffmpeg
+      - name: Create work directory
+        run: mkdir -p work
 
-      - name: Install Python deps
+      - name: Install system dependencies
         run: |
+          sudo apt update
+          sudo apt install -y ffmpeg
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
           pip install -r requirements.txt
-          # 초기에 requirements.txt가 없어도 에러 안 나게 대비
-          true
 
       - name: Run pipeline script
         run: python scripts/run_pipeline.py
+        
+      - name: Upload artifacts (optional)
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: pipeline-results
+          path: work/
