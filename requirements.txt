@@ -5,3 +5,12 @@ transformers
 notion-client
 python-dotenv
 pysbd
+# YouTube 다운로드
+yt-dlp
+
+# 음성 인식
+openai-whisper
+
+# 기본 라이브러리들
+requests
+pathlib2
